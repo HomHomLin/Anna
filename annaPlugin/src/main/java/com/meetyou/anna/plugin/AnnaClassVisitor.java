@@ -1,24 +1,23 @@
 package com.meetyou.anna.plugin;
 
-import org.objectweb.asm.AnnotationVisitor;
+import com.meetyou.anna.inject.support.AnnaInjected;
+
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 
-import java.util.ArrayList;
-
 /**
  * Created by Linhh on 17/6/8.
  */
 
-public class AnnaJarClassVisitor extends ClassVisitor {
+public class AnnaClassVisitor extends ClassVisitor {
     private boolean mAnnaInject = true;
     private String mInjectClazz;
     private String mClazzName;
 
-    public AnnaJarClassVisitor(String injectClazz, int api, ClassVisitor cv) {
+    public AnnaClassVisitor(String injectClazz, int api, ClassVisitor cv) {
         super(api, cv);
         mInjectClazz = injectClazz;
     }
@@ -34,7 +33,7 @@ public class AnnaJarClassVisitor extends ClassVisitor {
 
     @Override
     public org.objectweb.asm.AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        if (Type.getDescriptor(AntiAssassin.class).equals(desc)) {
+        if (Type.getDescriptor(AntiAssassin.class).equals(desc) || Type.getDescriptor(AnnaInjected.class).equals(desc)) {
             mAnnaInject = false;
         }
         return super.visitAnnotation(desc, visible);

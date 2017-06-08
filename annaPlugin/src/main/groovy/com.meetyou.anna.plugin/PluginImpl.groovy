@@ -2,21 +2,16 @@ package com.meetyou.anna.plugin
 
 import com.android.build.api.transform.*
 import com.android.build.gradle.AppExtension
-import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.google.common.collect.Sets
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.internal.impldep.org.apache.ivy.util.FileUtil
-import org.gradle.internal.impldep.org.codehaus.plexus.util.IOUtil
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
-import sun.instrument.TransformerManager
 
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -34,9 +29,10 @@ public class PluginImpl extends Transform implements Plugin<Project> {
     HashMap<String, ArrayList<AssassinDO>> process = new HashMap<>();
     String mReceiver;
 
-    boolean isLibrary = false;
-
     private int clazzindex = 1;
+    private ArrayList<String> mBuildDirs = new ArrayList<>();
+    private String mInjectPkg = "com/meetyou/anna/inject/support";
+    private String minjectClass = "AnnaProjectInject"
 
     void processFile(String type, String it){
         if(type.equals("receiver")){
@@ -72,17 +68,14 @@ public class PluginImpl extends Transform implements Plugin<Project> {
     }
 
     void apply(Project project) {
-        /*project.task('testTask') << {
-             println "Hello gradle plugin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-         }
+        //读取当前工程的build dir
+        project.android.applicationVariants.all {
+            it ->
+                println "find build dir: $project.buildDir/intermediates/classes/${it.dirName}"
+                mBuildDirs.add("$project.buildDir/intermediates/classes/${it.dirName}");
 
-         //task耗时监听
-         project.gradle.addListener(new TimeListener())
-    */
-        //读写配置
-//        new File("anna.properties").withInputStream {
-//            stream -> props.load(stream)
-//        }
+        }
+
 
         String type_default = "default";
         String type_insert = "insert";
@@ -143,10 +136,6 @@ public class PluginImpl extends Transform implements Plugin<Project> {
 
     @Override
     public Set<QualifiedContent.Scope> getScopes() {
-        if (isLibrary) {
-            return TransformManager.SCOPE_FULL_LIBRARY;
-//            return Sets.immutableEnumSet(QualifiedContent.Scope.PROJECT, QualifiedContent.Scope.PROJECT_LOCAL_DEPS);
-        }
         return TransformManager.SCOPE_FULL_PROJECT;
     }
 
@@ -189,6 +178,25 @@ public class PluginImpl extends Transform implements Plugin<Project> {
 //
 //            propsItem.add(assassinDO);
 //        }
+        //写入inject数据
+        AnnaInjectWriter annaInjectWriter = new AnnaInjectWriter();
+        for(String buildDir : mBuildDirs){
+            String pkg = buildDir + File.separator + mInjectPkg;
+            File pkgFile = new File(pkg);
+            pkgFile.mkdirs()
+
+            //写入注解
+            FileOutputStream fos = new FileOutputStream(pkg + File.separator + "AnnaInjected.class");
+            fos.write(annaInjectWriter.injectAnnotation())
+            fos.close()
+
+            //写入inject类
+            fos = new FileOutputStream(pkg + File.separator + minjectClass + ".class");
+            fos.write(annaInjectWriter.inject(mInjectPkg + "/" + minjectClass, true))
+            fos.close()
+
+
+        }
         //遍历inputs里的TransformInput
         inputs.each { TransformInput input ->
             //遍历input里边的DirectoryInput
@@ -201,19 +209,21 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                             File file ->
                                 def filename = file.name;
                                 def name = file.name
+                                String injectClazz = mInjectPkg + "/" + minjectClass
                                 //这里进行我们的处理 TODO
                                 if (name.endsWith(".class") && !name.startsWith("R\$") &&
                                         !"R.class".equals(name) && !"BuildConfig.class".equals(name)) {
                                     ClassReader classReader = new ClassReader(file.bytes)
                                     ClassWriter classWriter = new ClassWriter(classReader,ClassWriter.COMPUTE_MAXS)
-                                    ClassVisitor cv = new AssassinMethodClassVisitor(classWriter, mReceiver, process)
+                                    ClassVisitor cv = new AnnaClassVisitor(injectClazz, Opcodes.ASM5,classWriter)
+//                                    ClassVisitor cv = new AssassinMethodClassVisitor(classWriter, mReceiver, process)
                                     classReader.accept(cv, EXPAND_FRAMES)
                                     byte[] code = classWriter.toByteArray()
                                     FileOutputStream fos = new FileOutputStream(
                                             file.parentFile.absolutePath + File.separator + name)
                                     fos.write(code)
                                     fos.close()
-                                    println 'Assassin-----> assassin file:' + file.getAbsolutePath()
+                                    println 'Anna-----> assassin file:' + file.getAbsolutePath()
                                 }
 //                                println 'Assassin-----> find file:' + file.getAbsolutePath()
                                 //project.logger.
@@ -261,7 +271,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                                 jarOutputStream.putNextEntry(zipEntry);
                                 ClassReader classReader = new ClassReader(IOUtils.toByteArray(inputStream))
                                 ClassWriter classWriter = new ClassWriter(classReader,ClassWriter.COMPUTE_MAXS)
-                                ClassVisitor cv = new AnnaJarClassVisitor(injectClazz, Opcodes.ASM5,classWriter)
+                                ClassVisitor cv = new AnnaClassVisitor(injectClazz, Opcodes.ASM5,classWriter)
                                 classReader.accept(cv, EXPAND_FRAMES)
                                 byte[] code = classWriter.toByteArray()
                                 jarOutputStream.write(code);
@@ -272,11 +282,12 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                         }
                         jarOutputStream.closeEntry();
                     }
+                    //写入inject注解
+
                     //写入inject文件
                     ZipEntry addEntry = new ZipEntry(injectClazz + ".class");
-                    AnnaInjectWriter annaInjectWriter = new AnnaInjectWriter();
                     jarOutputStream.putNextEntry(addEntry);
-                    jarOutputStream.write(annaInjectWriter.inject(injectClazz));
+                    jarOutputStream.write(annaInjectWriter.inject(injectClazz,false));
                     jarOutputStream.closeEntry();
 
                     clazzindex++ ;
@@ -292,11 +303,11 @@ public class PluginImpl extends Transform implements Plugin<Project> {
 
                 def dest = outputProvider.getContentLocation(jarName + md5Name,
                         jarInput.contentTypes, jarInput.scopes, Format.JAR)
-                println 'Assassin-----> copy to Jar:' + dest.absolutePath
+                println 'Anna-----> copy to Jar:' + dest.absolutePath
                 FileUtils.copyFile(jarInput.file, dest)
             }
         }
-        println '==================anna end=================='
+        println '==================Anna end=================='
 
     }
 }

@@ -1,5 +1,6 @@
 package com.meetyou.anna.plugin;
 
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
@@ -12,12 +13,38 @@ import org.objectweb.asm.Type;
  */
 
 public class AnnaInjectWriter {
-    public byte[] inject(String clazz){
+    public byte[] injectAnnotation(){
         ClassWriter cw = new ClassWriter(0);
         FieldVisitor fv;
         MethodVisitor mv;
+        AnnotationVisitor av0;
+
+        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_ANNOTATION + Opcodes.ACC_ABSTRACT + Opcodes.ACC_INTERFACE, "com/meetyou/anna/inject/support/AnnaInjected", null, "java/lang/Object", new String[] { "java/lang/annotation/Annotation" });
+
+        {
+            av0 = cw.visitAnnotation("Ljava/lang/annotation/Retention;", true);
+            av0.visitEnum("value", "Ljava/lang/annotation/RetentionPolicy;", "RUNTIME");
+            av0.visitEnd();
+        }
+        cw.visitEnd();
+
+        return cw.toByteArray();
+    }
+
+    public byte[] inject(String clazz, boolean needAnnotation){
+        ClassWriter cw = new ClassWriter(0);
+        FieldVisitor fv;
+        MethodVisitor mv;
+        AnnotationVisitor av0;
 
         cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, clazz, null, "java/lang/Object", null);
+
+        {
+            if(needAnnotation) {
+                av0 = cw.visitAnnotation("Lcom/meetyou/anna/inject/support/AnnaInjected;", true);
+                av0.visitEnd();
+            }
+        }
 
         {
             fv = cw.visitField(Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC, "mAnnaInject", "L" + clazz + ";", null, null);
