@@ -249,11 +249,12 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                     jarName = jarName.substring(0, jarName.length() - 4)
                 }
 
+                File tmpFile = null;
                 if (jarInput.file.getAbsolutePath().endsWith(".jar")) {
                     String injectClazz = "com/meetyou/anna/inject/support/AnnaInject" + clazzindex;
                     JarFile jarFile = new JarFile(jarInput.file);
                     Enumeration enumeration = jarFile.entries();
-                    File tmpFile = new File(jarInput.file.getParent() + File.separator + "classes.jar.tmp");
+                    tmpFile = new File(jarInput.file.getParent() + File.separator + "classes_anna.jar");
                     JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(tmpFile));
                     while (enumeration.hasMoreElements()) {
                         JarEntry jarEntry = (JarEntry) enumeration.nextElement();
@@ -294,8 +295,8 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                     //结束
                     jarOutputStream.close();
                     jarFile.close();
-                    jarInput.file.delete();
-                    tmpFile.renameTo(jarInput.file);
+//                    jarInput.file.delete();
+//                    tmpFile.renameTo(jarInput.file);
                 }
 //                println 'Assassin-----> find Jar:' + jarInput.getFile().getAbsolutePath()
 
@@ -304,7 +305,11 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                 def dest = outputProvider.getContentLocation(jarName + md5Name,
                         jarInput.contentTypes, jarInput.scopes, Format.JAR)
                 println 'Anna-----> copy to Jar:' + dest.absolutePath
-                FileUtils.copyFile(jarInput.file, dest)
+                if(tmpFile == null) {
+                    FileUtils.copyFile(jarInput.file, dest)
+                }else{
+                    FileUtils.copyFile(tmpFile, dest)
+                }
             }
         }
         println '==================Anna end=================='
