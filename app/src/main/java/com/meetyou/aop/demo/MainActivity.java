@@ -13,5 +13,6 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        AnnaInject.getInject().onMethodEnter(null,null,null, null, null);
     }
 }

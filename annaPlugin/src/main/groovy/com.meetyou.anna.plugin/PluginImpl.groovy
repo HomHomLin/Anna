@@ -15,6 +15,7 @@ import org.gradle.internal.impldep.org.codehaus.plexus.util.IOUtil
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Opcodes
 import sun.instrument.TransformerManager
 
 import java.util.jar.JarEntry
@@ -239,6 +240,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                 }
 
                 if (jarInput.file.getAbsolutePath().endsWith(".jar")) {
+                    String injectClazz = "com/meetyou/anna/inject/support/AnnaInject" + clazzindex;
                     JarFile jarFile = new JarFile(jarInput.file);
                     Enumeration enumeration = jarFile.entries();
                     File tmpFile = new File(jarInput.file.getParent() + File.separator + "classes.jar.tmp");
@@ -249,31 +251,36 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                         ZipEntry zipEntry = new ZipEntry(entryName);
 
                         InputStream inputStream = jarFile.getInputStream(jarEntry);
-                        if (entryName.endsWith(".class") && !entryName.contains("R\$") &&
-                                !entryName.contains("R.class") && !entryName.contains("BuildConfig.class")) {
-                            //class文件处理
-                            println "entryName:" + entryName
-                            jarOutputStream.putNextEntry(zipEntry);
-                            ClassReader classReader = new ClassReader(IOUtils.toByteArray(inputStream))
-                            ClassWriter classWriter = new ClassWriter(classReader,ClassWriter.COMPUTE_MAXS)
-                            ClassVisitor cv = new AssassinMethodClassVisitor(classWriter, mReceiver, process)
-                            classReader.accept(cv, EXPAND_FRAMES)
-                            byte[] code = classWriter.toByteArray()
-                            jarOutputStream.write(code);
-                        } else {
-                            jarOutputStream.putNextEntry(zipEntry);
-                            jarOutputStream.write(IOUtils.toByteArray(inputStream));
+                        //如果是inject文件就跳过
+                        if(!entryName.startsWith("com/meetyou/anna/inject/support/AnnaInject")){
+                            //anna插桩class
+                            if (entryName.endsWith(".class") && !entryName.contains("R\$") &&
+                                    !entryName.contains("R.class") && !entryName.contains("BuildConfig.class")) {
+                                //class文件处理
+                                println "entryName:" + entryName
+                                jarOutputStream.putNextEntry(zipEntry);
+                                ClassReader classReader = new ClassReader(IOUtils.toByteArray(inputStream))
+                                ClassWriter classWriter = new ClassWriter(classReader,ClassWriter.COMPUTE_MAXS)
+                                ClassVisitor cv = new AnnaJarClassVisitor(injectClazz, Opcodes.ASM5,classWriter)
+                                classReader.accept(cv, EXPAND_FRAMES)
+                                byte[] code = classWriter.toByteArray()
+                                jarOutputStream.write(code);
+                            } else {
+                                jarOutputStream.putNextEntry(zipEntry);
+                                jarOutputStream.write(IOUtils.toByteArray(inputStream));
+                            }
                         }
                         jarOutputStream.closeEntry();
                     }
-                    //写入新文件
-                    ZipEntry addEntry = new ZipEntry("com/meetyou/anna/inject/support/AnnaInject" + clazzindex + ".class");
+                    //写入inject文件
+                    ZipEntry addEntry = new ZipEntry(injectClazz + ".class");
                     AnnaInjectWriter annaInjectWriter = new AnnaInjectWriter();
                     jarOutputStream.putNextEntry(addEntry);
-                    jarOutputStream.write(annaInjectWriter.inject("com/meetyou/anna/inject/support/AnnaInject" + clazzindex ));
+                    jarOutputStream.write(annaInjectWriter.inject(injectClazz));
                     jarOutputStream.closeEntry();
 
                     clazzindex++ ;
+                    //结束
                     jarOutputStream.close();
                     jarFile.close();
                     jarInput.file.delete();
