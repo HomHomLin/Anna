@@ -242,7 +242,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                  * 重名名输出文件,因为可能同名,会覆盖
                  */
                 def jarName = jarInput.name
-//                println "Assassin jar jarName:" + jarName + "; "+ jarInput.file.absolutePath
+                println "Anna jarName:" + jarName + "; "+ jarInput.file.absolutePath
                 def md5Name = DigestUtils.md5Hex(jarInput.file.getAbsolutePath())
                 if (jarName.endsWith(".jar")) {
 
@@ -255,7 +255,13 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                     JarFile jarFile = new JarFile(jarInput.file);
                     Enumeration enumeration = jarFile.entries();
                     tmpFile = new File(jarInput.file.getParent() + File.separator + "classes_anna.jar");
+                    //避免上次的缓存被重复插入
+                    if(tmpFile.exists()) {
+                        tmpFile.delete();
+                    }
                     JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(tmpFile));
+                    //用于保存
+                    ArrayList<String> processorList = new ArrayList<>();
                     while (enumeration.hasMoreElements()) {
                         JarEntry jarEntry = (JarEntry) enumeration.nextElement();
                         String entryName = jarEntry.getName();
@@ -268,7 +274,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                             if (entryName.endsWith(".class") && !entryName.contains("R\$") &&
                                     !entryName.contains("R.class") && !entryName.contains("BuildConfig.class")) {
                                 //class文件处理
-                                println "entryName:" + entryName
+                                println "entryName anna:" + entryName
                                 jarOutputStream.putNextEntry(zipEntry);
                                 ClassReader classReader = new ClassReader(IOUtils.toByteArray(inputStream))
                                 ClassWriter classWriter = new ClassWriter(classReader,ClassWriter.COMPUTE_MAXS)
@@ -276,7 +282,17 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                                 classReader.accept(cv, EXPAND_FRAMES)
                                 byte[] code = classWriter.toByteArray()
                                 jarOutputStream.write(code);
-                            } else {
+                            } else if(entryName.contains("META-INF/services/javax.annotation.processing.Processor")){
+                                if(!processorList.contains(entryName)){
+                                    println "entryName no anna:" + entryName
+                                    processorList.add(entryName)
+                                    jarOutputStream.putNextEntry(zipEntry);
+                                    jarOutputStream.write(IOUtils.toByteArray(inputStream));
+                                }else{
+                                    println "duplicate entry:" + entryName
+                                }
+                            }else {
+                                println "entryName no anna:" + entryName
                                 jarOutputStream.putNextEntry(zipEntry);
                                 jarOutputStream.write(IOUtils.toByteArray(inputStream));
                             }
@@ -309,6 +325,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                     FileUtils.copyFile(jarInput.file, dest)
                 }else{
                     FileUtils.copyFile(tmpFile, dest)
+                    tmpFile.delete()
                 }
             }
         }

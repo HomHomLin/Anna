@@ -57,22 +57,16 @@ public class AnnaClassVisitor extends ClassVisitor {
                 if(!mAnnaInject){
                     return;
                 }
-                mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "getInject", "()L" + mInjectClazz + ";", false);
-                mv.visitLdcInsn(mClazzName);
-                if ((methodAccess & ACC_STATIC) == 0) {
-                    loadThis();
-                } else {
-                    push((String) null);
+//                if(AsmUtils.CLASS_INITIALIZER.equals(name)||AsmUtils.CONSTRUCTOR.equals(name)){
+//                    return;
+//                }
+                //@warn 这部分代码请重点review一下，判断条件写错会要命
+                //这部分代码请重点review一下，判断条件写错会要命
+                // synthetic 方法暂时不aop 比如AsyncTask 会生成一些同名 synthetic方法,对synthetic 以及private的方法也插入的代码，主要是针对lambda表达式
+                if(((access& Opcodes.ACC_SYNTHETIC) != 0)&&((access & Opcodes.ACC_PRIVATE)==0)){
+                    return;
                 }
-                mv.visitLdcInsn(name);
-                loadArgArray();
-                mv.visitLdcInsn(Type.getReturnType(methodDesc).toString());
-                mv.visitMethodInsn(INVOKEVIRTUAL, mInjectClazz, "onMethodEnter", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", false);
-            }
-
-            @Override
-            protected void onMethodExit(int i) {
-                if(!mAnnaInject){
+                if ((access & Opcodes.ACC_NATIVE) != 0) {
                     return;
                 }
                 mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "getInject", "()L" + mInjectClazz + ";", false);
@@ -83,7 +77,38 @@ public class AnnaClassVisitor extends ClassVisitor {
                     push((String) null);
                 }
                 mv.visitLdcInsn(name);
-                loadArgArray();
+//                loadArgArray();
+
+                push((String) null);
+                mv.visitLdcInsn(Type.getReturnType(methodDesc).toString());
+                mv.visitMethodInsn(INVOKEVIRTUAL, mInjectClazz, "onMethodEnter", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", false);
+            }
+
+            @Override
+            protected void onMethodExit(int i) {
+                if(!mAnnaInject){
+                    return;
+                }
+                //@warn 这部分代码请重点review一下，判断条件写错会要命
+                //这部分代码请重点review一下，判断条件写错会要命
+                // synthetic 方法暂时不aop 比如AsyncTask 会生成一些同名 synthetic方法,对synthetic 以及private的方法也插入的代码，主要是针对lambda表达式
+                if(((access& Opcodes.ACC_SYNTHETIC) != 0)&&((access & Opcodes.ACC_PRIVATE)==0)){
+                    return;
+                }
+                if ((access & Opcodes.ACC_NATIVE) != 0) {
+                    return;
+                }
+                mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "getInject", "()L" + mInjectClazz + ";", false);
+                mv.visitLdcInsn(mClazzName);
+                if ((methodAccess & ACC_STATIC) == 0) {
+                    loadThis();
+                } else {
+                    push((String) null);
+                }
+                mv.visitLdcInsn(name);
+//                loadArgArray();
+
+                push((String) null);
                 mv.visitLdcInsn(Type.getReturnType(methodDesc).toString());
                 mv.visitMethodInsn(INVOKEVIRTUAL, mInjectClazz, "onMethodExit", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", false);
             }
