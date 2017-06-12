@@ -6,41 +6,33 @@ import java.lang.reflect.Method;
  * Created by Linhh on 17/6/8.
  */
 public class AnnaInject {
-    private static AnnaInject mAnnaInject;
     public final static String ANNA_RECEIVER_CLASS = "com.meetyou.anna.client.impl.AnnaReceiver";
-    private Object mAnnaReceiver;
-    private Method mMethodEnter;
-    private Method mMethodExit;
-    private Method mOnIntercept;
+    private static Object mAnnaReceiver;
+    private static Method mMethodEnter;
+    private static Method mMethodExit;
+    private static Method mOnIntercept;
 
-    public static AnnaInject getInject() {
-        if (mAnnaInject == null) {
-            mAnnaInject = new AnnaInject();
-        }
-        return mAnnaInject;
-    }
-
-    public void makeClazz() throws Exception{
+    private static void makeClazz() throws Exception{
         Class clazz = Class.forName(ANNA_RECEIVER_CLASS);
         mAnnaReceiver = clazz.newInstance();
     }
 
-    public boolean onIntercept() {
+    public static boolean onIntercept(String clazzname, Object obj, String name, Object[] objects, String rtype) {
         try {
             if(mAnnaReceiver == null){
                 makeClazz();
             }
             if(mOnIntercept == null) {
-                mOnIntercept = mAnnaReceiver.getClass().getMethod("onIntercept");
+                mOnIntercept = mAnnaReceiver.getClass().getMethod("onIntercept", String.class, Object.class, String.class, Object[].class, String.class);
             }
-            return (boolean)mOnIntercept.invoke(mAnnaReceiver);
+            return (Boolean)mOnIntercept.invoke(mAnnaReceiver, clazzname, obj, name, objects, rtype);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    public Object onMethodEnter(String clazzname, Object obj, String name, Object[] objects, String rtype) {
+    public static Object onMethodEnter(String clazzname, Object obj, String name, Object[] objects, String rtype) {
         try {
             if(mAnnaReceiver == null){
                 makeClazz();
@@ -55,7 +47,7 @@ public class AnnaInject {
         return null;
     }
 
-    public void onMethodExit(String clazzname, Object obj, String name, Object[] objects, String rtype) {
+    public static void onMethodExit(String clazzname, Object obj, String name, Object[] objects, String rtype) {
         try {
             if(mAnnaReceiver == null){
                 makeClazz();
