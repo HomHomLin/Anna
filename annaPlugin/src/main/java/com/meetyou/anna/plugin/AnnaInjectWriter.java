@@ -12,7 +12,7 @@ import org.objectweb.asm.Type;
  * Created by Linhh on 17/6/8.
  */
 
-public class AnnaInjectWriter {
+public class AnnaInjectWriter implements Opcodes{
     public byte[] injectAnnotation(){
         ClassWriter cw = new ClassWriter(0);
         FieldVisitor fv;
@@ -67,6 +67,10 @@ public class AnnaInjectWriter {
             fv.visitEnd();
         }
         {
+            fv = cw.visitField(Opcodes.ACC_PRIVATE, "mOnIntercept", "Ljava/lang/reflect/Method;", null, null);
+            fv.visitEnd();
+        }
+        {
             mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
             mv.visitCode();
             mv.visitVarInsn(Opcodes.ALOAD, 0);
@@ -104,6 +108,98 @@ public class AnnaInjectWriter {
             mv.visitFieldInsn(Opcodes.PUTFIELD, clazz, "mAnnaReceiver", "Ljava/lang/Object;");
             mv.visitInsn(Opcodes.RETURN);
             mv.visitMaxs(2, 2);
+            mv.visitEnd();
+        }
+        {
+            mv = cw.visitMethod(ACC_PUBLIC, "onIntercept", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)Z", null, null);
+            mv.visitCode();
+            Label l0 = new Label();
+            Label l1 = new Label();
+            Label l2 = new Label();
+            mv.visitTryCatchBlock(l0, l1, l2, "java/lang/Exception");
+            mv.visitLabel(l0);
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitFieldInsn(GETFIELD, clazz, "mAnnaReceiver", "Ljava/lang/Object;");
+            Label l3 = new Label();
+            mv.visitJumpInsn(IFNONNULL, l3);
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitMethodInsn(INVOKEVIRTUAL, clazz, "makeClazz", "()V", false);
+            mv.visitLabel(l3);
+            mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitFieldInsn(GETFIELD, clazz, "mOnIntercept", "Ljava/lang/reflect/Method;");
+            Label l4 = new Label();
+            mv.visitJumpInsn(IFNONNULL, l4);
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitFieldInsn(GETFIELD, clazz, "mAnnaReceiver", "Ljava/lang/Object;");
+            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
+            mv.visitLdcInsn("onIntercept");
+            mv.visitInsn(ICONST_5);
+            mv.visitTypeInsn(ANEWARRAY, "java/lang/Class");
+            mv.visitInsn(DUP);
+            mv.visitInsn(ICONST_0);
+            mv.visitLdcInsn(Type.getType("Ljava/lang/String;"));
+            mv.visitInsn(AASTORE);
+            mv.visitInsn(DUP);
+            mv.visitInsn(ICONST_1);
+            mv.visitLdcInsn(Type.getType("Ljava/lang/Object;"));
+            mv.visitInsn(AASTORE);
+            mv.visitInsn(DUP);
+            mv.visitInsn(ICONST_2);
+            mv.visitLdcInsn(Type.getType("Ljava/lang/String;"));
+            mv.visitInsn(AASTORE);
+            mv.visitInsn(DUP);
+            mv.visitInsn(ICONST_3);
+            mv.visitLdcInsn(Type.getType("[Ljava/lang/Object;"));
+            mv.visitInsn(AASTORE);
+            mv.visitInsn(DUP);
+            mv.visitInsn(ICONST_4);
+            mv.visitLdcInsn(Type.getType("Ljava/lang/String;"));
+            mv.visitInsn(AASTORE);
+            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "getMethod", "(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;", false);
+            mv.visitFieldInsn(PUTFIELD, clazz, "mOnIntercept", "Ljava/lang/reflect/Method;");
+            mv.visitLabel(l4);
+            mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitFieldInsn(GETFIELD, clazz, "mOnIntercept", "Ljava/lang/reflect/Method;");
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitFieldInsn(GETFIELD, clazz, "mAnnaReceiver", "Ljava/lang/Object;");
+            mv.visitInsn(ICONST_5);
+            mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
+            mv.visitInsn(DUP);
+            mv.visitInsn(ICONST_0);
+            mv.visitVarInsn(ALOAD, 1);
+            mv.visitInsn(AASTORE);
+            mv.visitInsn(DUP);
+            mv.visitInsn(ICONST_1);
+            mv.visitVarInsn(ALOAD, 2);
+            mv.visitInsn(AASTORE);
+            mv.visitInsn(DUP);
+            mv.visitInsn(ICONST_2);
+            mv.visitVarInsn(ALOAD, 3);
+            mv.visitInsn(AASTORE);
+            mv.visitInsn(DUP);
+            mv.visitInsn(ICONST_3);
+            mv.visitVarInsn(ALOAD, 4);
+            mv.visitInsn(AASTORE);
+            mv.visitInsn(DUP);
+            mv.visitInsn(ICONST_4);
+            mv.visitVarInsn(ALOAD, 5);
+            mv.visitInsn(AASTORE);
+            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/reflect/Method", "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;", false);
+            mv.visitTypeInsn(CHECKCAST, "java/lang/Boolean");
+            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
+            mv.visitLabel(l1);
+            mv.visitInsn(IRETURN);
+            mv.visitLabel(l2);
+            mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[] {"java/lang/Exception"});
+            mv.visitVarInsn(ASTORE, 6);
+            mv.visitVarInsn(ALOAD, 6);
+            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Exception", "printStackTrace", "()V", false);
+            mv.visitInsn(ICONST_0);
+            mv.visitInsn(IRETURN);
+            mv.visitMaxs(7, 7);
             mv.visitEnd();
         }
         {

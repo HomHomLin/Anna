@@ -6,18 +6,26 @@ import java.lang.reflect.Method;
  * Created by Linhh on 17/6/8.
  */
 public class AnnaInject {
+    private static AnnaInject mAnnaInject;
     public final static String ANNA_RECEIVER_CLASS = "com.meetyou.anna.client.impl.AnnaReceiver";
-    private static Object mAnnaReceiver;
-    private static Method mMethodEnter;
-    private static Method mMethodExit;
-    private static Method mOnIntercept;
+    private Object mAnnaReceiver;
+    private Method mMethodEnter;
+    private Method mMethodExit;
+    private Method mOnIntercept;
 
-    private static void makeClazz() throws Exception{
+    public static AnnaInject getInject() {
+        if (mAnnaInject == null) {
+            mAnnaInject = new AnnaInject();
+        }
+        return mAnnaInject;
+    }
+
+    public void makeClazz() throws Exception{
         Class clazz = Class.forName(ANNA_RECEIVER_CLASS);
         mAnnaReceiver = clazz.newInstance();
     }
 
-    public static boolean onIntercept(String clazzname, Object obj, String name, Object[] objects, String rtype) {
+    public boolean onIntercept(String clazzname, Object obj, String name, Object[] objects, String rtype) {
         try {
             if(mAnnaReceiver == null){
                 makeClazz();
@@ -32,7 +40,7 @@ public class AnnaInject {
         return false;
     }
 
-    public static Object onMethodEnter(String clazzname, Object obj, String name, Object[] objects, String rtype) {
+    public Object onMethodEnter(String clazzname, Object obj, String name, Object[] objects, String rtype) {
         try {
             if(mAnnaReceiver == null){
                 makeClazz();
@@ -47,7 +55,7 @@ public class AnnaInject {
         return null;
     }
 
-    public static void onMethodExit(String clazzname, Object obj, String name, Object[] objects, String rtype) {
+    public void onMethodExit(String clazzname, Object obj, String name, Object[] objects, String rtype) {
         try {
             if(mAnnaReceiver == null){
                 makeClazz();
