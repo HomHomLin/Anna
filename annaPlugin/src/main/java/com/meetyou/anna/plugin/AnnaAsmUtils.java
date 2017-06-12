@@ -11,6 +11,30 @@ import java.util.List;
 
 public final class AnnaAsmUtils {
 
+    public static void returnResult(MethodVisitor mv, Type returnType){
+        //判断是否有返回值，代码不同
+        if("V".equals(returnType.getDescriptor())){
+            mv.visitInsn(Opcodes.RETURN);
+        }else{
+            //强制转化类型
+            if(!castPrimateToObj(mv, returnType.getDescriptor())){
+                //这里需要注意，如果是数组类型的直接使用即可，如果非数组类型，就得去除前缀了,还有最终是没有结束符;
+                //比如：Ljava/lang/String; ==》 java/lang/String
+                String newTypeStr = null;
+                int len = returnType.getDescriptor().length();
+                if(returnType.getDescriptor().startsWith("[")){
+                    newTypeStr = returnType.getDescriptor().substring(0, len);
+                }else{
+                    newTypeStr = returnType.getDescriptor().substring(1, len-1);
+                }
+                mv.visitTypeInsn(Opcodes.CHECKCAST, newTypeStr);
+            }
+
+            //这里还需要做返回类型不同返回指令也不同
+            mv.visitInsn(getReturnTypeCode(returnType.getDescriptor()));
+        }
+    }
+
 //
 //    private static void prepareMethodParameters(GeneratorAdapter mv, String className, List<Type> args, Type returnType, boolean isStatic, int methodId) {
 //        //第一个参数：new Object[]{...};,如果方法没有参数直接传入new Object[0]
@@ -124,7 +148,7 @@ public final class AnnaAsmUtils {
      * @param paramsTypeClass
      * @param isStatic
      */
-    public static void createObjectArray(MethodVisitor mv, List<Type> paramsTypeClass, boolean isStatic){
+    public static int createObjectArray(MethodVisitor mv, List<Type> paramsTypeClass, boolean isStatic){
         //Opcodes.ICONST_0 ~ Opcodes.ICONST_5 这个指令范围
         int argsCount = paramsTypeClass.size();
         //声明 Object[argsCount];
@@ -164,6 +188,7 @@ public final class AnnaAsmUtils {
             }
             loadIndex ++;
         }
+        return loadIndex;
     }
 
     private static void createBooleanObj(MethodVisitor mv, int argsPostion){

@@ -130,11 +130,11 @@ public class AnnaClassVisitor extends ClassVisitor {
                     paramsTypeClass.add(type);
                 }
 //                loadArgArray();
-                if(paramsTypeClass.size() == 0){
+//                if(paramsTypeClass.size() == 0){
                     push((String) null);
-                }else {
-                    AnnaAsmUtils.createObjectArray(mv, paramsTypeClass, is_static);
-                }
+//                }else {
+//                    AnnaAsmUtils.createObjectArray(mv, paramsTypeClass, is_static);
+//                }
                 mv.visitLdcInsn(Type.getReturnType(methodDesc).toString());
                 mv.visitMethodInsn(INVOKEVIRTUAL, mInjectClazz, "onMethodExit", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", false);
             }

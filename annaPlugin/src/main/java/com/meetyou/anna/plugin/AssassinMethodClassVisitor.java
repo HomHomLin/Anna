@@ -290,28 +290,28 @@ public class AssassinMethodClassVisitor extends ClassVisitor {
 //                mv.visitVarInsn(ALOAD, start_index);
                     mv.visitMethodInsn(INVOKESTATIC, mReveiver, "onMethodEnter",
                             "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V;", false);
-//                mv.visitVarInsn(ASTORE, start_index);
-//
-//                //如果拦截器为真
-//                if(mAllReplace || type.equals("replace")) {
-//                    print("override:" + name);
-////                String methodKey = "method." + name;
-////                mv.visitMethodInsn(INVOKESTATIC, "com/meiyou/meetyoucost/TimeCache", "onIntecept", "()Z", false);
-////                Label l0 = new Label();
-////                mv.visitJumpInsn(IFEQ, l0);
-//                    onMethodExit(-1);
-//                    String return_v = Type.getReturnType(desc).toString();
-//                    if (!return_v.equals("V")) {
-//                        //有返回值
-//                        mv.visitVarInsn(ALOAD, start_index);
-//                        returnValue();
-//                    } else {
-//                        mv.visitInsn(RETURN);
-//                    }
-//
-////                    mv.visitLabel(l0);
-//                    mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-//                }
+                mv.visitVarInsn(ASTORE, start_index);
+
+                //如果拦截器为真
+                if(mAllReplace || type.equals("replace")) {
+                    print("override:" + name);
+//                String methodKey = "method." + name;
+//                mv.visitMethodInsn(INVOKESTATIC, "com/meiyou/meetyoucost/TimeCache", "onIntecept", "()Z", false);
+//                Label l0 = new Label();
+//                mv.visitJumpInsn(IFEQ, l0);
+                    onMethodExit(-1);
+                    String return_v = Type.getReturnType(desc).toString();
+                    if (!return_v.equals("V")) {
+                        //有返回值
+                        mv.visitVarInsn(ALOAD, start_index);
+                        returnValue();
+                    } else {
+                        mv.visitInsn(RETURN);
+                    }
+
+//                    mv.visitLabel(l0);
+                    mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+                }
 
 
             }

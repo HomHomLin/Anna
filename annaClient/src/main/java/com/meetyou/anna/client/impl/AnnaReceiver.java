@@ -14,7 +14,13 @@ public class AnnaReceiver {
         Log.d("AssassinReveiver","onMethodExit is called:" + clazz + ";" + name);
     }
 
-    public void onMethodEnter(String clazz, Object obj, String name, Object[] objects, String rtype){
+    public Object onMethodEnter(String clazz, Object obj, String name, Object[] objects, String rtype){
         Log.d("AssassinReveiver","onMethodEnter is called:" + clazz + ";" + name);
+        return null;
+    }
+
+    public boolean onIntercept(String clazz, Object obj, String name, Object[] objects, String rtype){
+        Log.d("AssassinReveiver","onMethodEnter is called:" + clazz + ";" + name);
+        return false;
     }
 }
