@@ -8,6 +8,9 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Linhh on 17/6/8.
  */
@@ -71,15 +74,27 @@ public class AnnaClassVisitor extends ClassVisitor {
                 }
                 mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "getInject", "()L" + mInjectClazz + ";", false);
                 mv.visitLdcInsn(mClazzName);
+                boolean is_static = false;
                 if ((methodAccess & ACC_STATIC) == 0) {
                     loadThis();
+                    is_static = false;
                 } else {
                     push((String) null);
+                    is_static = true;
                 }
                 mv.visitLdcInsn(name);
+                List<Type> paramsTypeClass = new ArrayList();
+                Type[] argsType = Type.getArgumentTypes(desc);
+                for (Type type : argsType) {
+                    paramsTypeClass.add(type);
+                }
 //                loadArgArray();
-
-                push((String) null);
+                if(paramsTypeClass.size() == 0){
+                    push((String) null);
+                }else {
+                    AnnaAsmUtils.createObjectArray(mv, paramsTypeClass, is_static);
+                }
+//                push((String) null);
                 mv.visitLdcInsn(Type.getReturnType(methodDesc).toString());
                 mv.visitMethodInsn(INVOKEVIRTUAL, mInjectClazz, "onMethodEnter", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", false);
             }
@@ -100,15 +115,26 @@ public class AnnaClassVisitor extends ClassVisitor {
                 }
                 mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "getInject", "()L" + mInjectClazz + ";", false);
                 mv.visitLdcInsn(mClazzName);
+                boolean is_static = false;
                 if ((methodAccess & ACC_STATIC) == 0) {
                     loadThis();
+                    is_static = false;
                 } else {
                     push((String) null);
+                    is_static = true;
                 }
                 mv.visitLdcInsn(name);
+                List<Type> paramsTypeClass = new ArrayList();
+                Type[] argsType = Type.getArgumentTypes(desc);
+                for (Type type : argsType) {
+                    paramsTypeClass.add(type);
+                }
 //                loadArgArray();
-
-                push((String) null);
+                if(paramsTypeClass.size() == 0){
+                    push((String) null);
+                }else {
+                    AnnaAsmUtils.createObjectArray(mv, paramsTypeClass, is_static);
+                }
                 mv.visitLdcInsn(Type.getReturnType(methodDesc).toString());
                 mv.visitMethodInsn(INVOKEVIRTUAL, mInjectClazz, "onMethodExit", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", false);
             }
