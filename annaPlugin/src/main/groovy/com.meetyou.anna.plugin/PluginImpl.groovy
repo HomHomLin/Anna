@@ -84,6 +84,9 @@ public class PluginImpl extends Transform implements Plugin<Project> {
         String type_freplace = "freplace";
         String type_receiver = "receiver";
         String curr_type = type_default;
+        MeetyouConfiguration meetyouConfiguration = new MeetyouConfiguration("test.pro");
+        meetyouConfiguration.process();
+        meetyouConfiguration.print();
 
         new File("assassin.pro").eachLine {
             if(!it.trim().startsWith("#")) {

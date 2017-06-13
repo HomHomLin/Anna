@@ -14,7 +14,10 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d("test",testanna() + "");
+//        Log.d("test",testanna() + "");
+        String s = "ty[/space*]pe2";
+        s = s.replace("[/space*]", " ");
+        Log.d("test",s);
     }
 
     public static boolean testanna(){
