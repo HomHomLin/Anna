@@ -10,6 +10,10 @@ import com.meetyou.anna.plugin.AntiAssassin;
 @AntiAssassin
 public class AnnaReceiver {
 
+    public AnnaReceiver(){
+        Log.d("AssassinReveiver","AnnaReceiver <init> is called");
+    }
+
     public void onMethodExit(String clazz, Object obj, String name, Object[] objects, String rtype){
         Log.d("AssassinReveiver","onMethodExit is called:" + clazz + ";" + name);
     }
