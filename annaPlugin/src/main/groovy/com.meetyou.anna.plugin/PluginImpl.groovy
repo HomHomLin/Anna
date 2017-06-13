@@ -165,7 +165,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
 
                 File tmpFile = null;
                 if (jarInput.file.getAbsolutePath().endsWith(".jar")) {
-                    String injectClazz = "com/meetyou/anna/inject/support/AnnaInject" + clazzindex;
+                    String injectClazz =  mInjectPkg + "/" + minjectClass;
                     JarFile jarFile = new JarFile(jarInput.file);
                     Enumeration enumeration = jarFile.entries();
                     tmpFile = new File(jarInput.file.getParent() + File.separator + "classes_anna.jar");
@@ -216,12 +216,12 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                     //写入inject注解
 
                     //写入inject文件
-                    ZipEntry addEntry = new ZipEntry(injectClazz + ".class");
-                    jarOutputStream.putNextEntry(addEntry);
-                    jarOutputStream.write(annaInjectWriter.inject(injectClazz,false));
-                    jarOutputStream.closeEntry();
-
-                    clazzindex++ ;
+//                    ZipEntry addEntry = new ZipEntry(injectClazz + ".class");
+//                    jarOutputStream.putNextEntry(addEntry);
+//                    jarOutputStream.write(annaInjectWriter.inject(injectClazz,false));
+//                    jarOutputStream.closeEntry();
+//
+//                    clazzindex++ ;
                     //结束
                     jarOutputStream.close();
                     jarFile.close();
