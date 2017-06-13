@@ -1,5 +1,6 @@
 package com.meetyou.anna.plugin;
 
+import com.meetyou.anna.ConfigurationDO;
 import com.meetyou.anna.inject.support.AnnaInjected;
 
 import org.objectweb.asm.ClassVisitor;
@@ -10,20 +11,26 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by Linhh on 17/6/8.
  */
 
 public class AnnaClassVisitor extends ClassVisitor {
+    private ArrayList<ConfigurationDO> mList;
     private boolean mAnnaInject = true;
+    private boolean mAnnaAll = false;
     private String mInjectClazz;
     private String mClazzName;
 
-    public AnnaClassVisitor(String injectClazz, int api, ClassVisitor cv) {
+    public AnnaClassVisitor(String injectClazz, int api, ClassVisitor cv, boolean all, ArrayList<ConfigurationDO> list) {
         super(api, cv);
         mInjectClazz = injectClazz;
+        mAnnaAll = all;
+        mList = list;
     }
 
     @Override
@@ -49,6 +56,12 @@ public class AnnaClassVisitor extends ClassVisitor {
         MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
         methodVisitor = new AdviceAdapter(Opcodes.ASM5, methodVisitor, access, name, desc) {
 
+            @Override
+            public void visitCode() {
+                super.visitCode();
+
+            }
+
             public void print(String msg){
                 mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
                 mv.visitLdcInsn(msg);
@@ -60,6 +73,23 @@ public class AnnaClassVisitor extends ClassVisitor {
             protected void onMethodEnter() {
                 if(!mAnnaInject){
                     return;
+                }
+                if(!mAnnaAll) {
+                    boolean anna_inject = false;
+                    //匹配插入规则
+                    if (mList != null) {
+                        for (ConfigurationDO configurationDO : mList) {
+                            String[] s = configurationDO.strings;
+                            if (s[0].equals("**") || s[0].equals(mClazzName)) {
+                                //全部匹配
+                                anna_inject = Pattern.compile(s[1])
+                                        .matcher(name).matches();
+                            }
+                        }
+                    }
+                    if (!anna_inject) {
+                        return;
+                    }
                 }
 //                if(AsmUtils.CLASS_INITIALIZER.equals(name)||AsmUtils.CONSTRUCTOR.equals(name)){
 //                    return;
@@ -129,6 +159,23 @@ public class AnnaClassVisitor extends ClassVisitor {
             protected void onMethodExit(int i) {
                 if(!mAnnaInject){
                     return;
+                }
+                if(!mAnnaAll) {
+                    boolean anna_inject = false;
+                    //匹配插入规则
+                    if (mList != null) {
+                        for (ConfigurationDO configurationDO : mList) {
+                            String[] s = configurationDO.strings;
+                            if (s[0].equals("**") || s[0].equals(mClazzName)) {
+                                //全部匹配
+                                anna_inject = Pattern.compile(s[1])
+                                        .matcher(name).matches();
+                            }
+                        }
+                    }
+                    if (!anna_inject) {
+                        return;
+                    }
                 }
                 //@warn 这部分代码请重点review一下，判断条件写错会要命
                 //这部分代码请重点review一下，判断条件写错会要命

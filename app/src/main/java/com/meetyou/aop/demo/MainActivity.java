@@ -7,6 +7,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class MainActivity extends FragmentActivity {
 
@@ -15,9 +16,13 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 //        Log.d("test",testanna() + "");
-        String s = "ty[/space*]pe2";
-        s = s.replace("[/space*]", " ");
-        Log.d("test",s);
+        boolean s = Pattern.compile("on[C]lick+")
+                .matcher("onClick").matches();
+        Log.d("test",s + "");
+    }
+
+    public void onClick(){
+
     }
 
     public static boolean testanna(){

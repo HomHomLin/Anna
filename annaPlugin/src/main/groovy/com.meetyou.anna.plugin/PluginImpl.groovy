@@ -3,6 +3,7 @@ package com.meetyou.anna.plugin
 import com.android.build.api.transform.*
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.pipeline.TransformManager
+import com.meetyou.anna.ConfigurationDO
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
@@ -25,47 +26,14 @@ import static org.objectweb.asm.ClassReader.EXPAND_FRAMES
  */
 
 public class PluginImpl extends Transform implements Plugin<Project> {
-//    def props = new Properties()
-    HashMap<String, ArrayList<AssassinDO>> process = new HashMap<>();
-    String mReceiver;
 
+    private MeetyouConfiguration meetyouConfiguration = new MeetyouConfiguration("anna_list.pro");
+    private ArrayList<ConfigurationDO> mInclude;
     private int clazzindex = 1;
     private ArrayList<String> mBuildDirs = new ArrayList<>();
     private String mInjectPkg = "com/meetyou/anna/inject/support";
     private String minjectClass = "AnnaProjectInject"
-
-    void processFile(String type, String it){
-        if(type.equals("receiver")){
-            //接收器处理
-            mReceiver = it.trim().split("\\;")[0];
-            println "anna----> receiver:" + mReceiver
-            return;
-        }
-        ArrayList<AssassinDO> arrayList = process.get(type);
-        if(arrayList == null){
-            arrayList = new ArrayList<>();
-        }
-        String m = it.trim().split("\\;")[0];
-        AssassinDO assassinDO = new AssassinDO();
-        if(!m.trim().startsWith("*")){
-            //包名
-            String[] r = m.trim().split("\\*");
-            assassinDO.des = r[0];//包名
-            assassinDO.name = r[1];
-        }else {
-            String[] r = m.trim().split("\\.");
-            if (r[0].trim().equals("**")) {
-                //如果是两个*代表是全量
-                assassinDO.des = "all";
-            } else if (r[0].trim().equals("*")) {
-                assassinDO.des = "normal";
-            }
-            assassinDO.name = r[1];
-        }
-        arrayList.add(assassinDO);
-        println "anna----> annaDO" + assassinDO.toString()
-        process.put(type, arrayList);
-    }
+    private boolean mNeedInject = false;
 
     void apply(Project project) {
         //读取当前工程的build dir
@@ -76,50 +44,19 @@ public class PluginImpl extends Transform implements Plugin<Project> {
 
         }
 
+        //处理配置文件
 
-        String type_default = "default";
-        String type_insert = "insert";
-        String type_replace = "replace";
-        String type_finsert = "finsert";
-        String type_freplace = "freplace";
-        String type_receiver = "receiver";
-        String curr_type = type_default;
-        MeetyouConfiguration meetyouConfiguration = new MeetyouConfiguration("test.pro");
         meetyouConfiguration.process();
         meetyouConfiguration.print();
-
-        new File("assassin.pro").eachLine {
-            if(!it.trim().startsWith("#")) {
-                //#开头代表是注释,直接跳过
-                if (it.trim().startsWith("}")) {
-                    //终止
-                    curr_type = type_default;
-                }
-                if (it.trim().startsWith("-insert")) {
-                    //插入
-                    curr_type = type_insert;
-                } else if (it.trim().startsWith("-replace")) {
-                    //替换
-                    curr_type = type_replace;
-                } else if (it.trim().startsWith("-receiver")) {
-                    //监听器
-                    curr_type = type_receiver;
-                } else if(it.trim().startsWith("-matchreplace")){
-                    //完整匹配替换
-                    curr_type = type_freplace;
-                } else if(it.trim().startsWith("-matchinsert")){
-                    //完整匹配插入
-                    curr_type = type_finsert;
-                }
-                //语法体
-                if (it.trim().endsWith(";")) {
-                    println curr_type + ":" + it
-                    if (!curr_type.equals(type_default)) {
-                        processFile(curr_type, it)
-                    }
-                }
-            }
+        mInclude = meetyouConfiguration.map.get("include");
+        ArrayList<ConfigurationDO> switch_list = meetyouConfiguration.map.get("switch");
+        if(switch_list != null){
+            mNeedInject = switch_list.get(0).strings[0].equals("all");
         }
+
+        print "need inject=" + mNeedInject
+
+
         def android = project.extensions.getByType(AppExtension);
         android.registerTransform(this)
 
@@ -156,31 +93,6 @@ public class PluginImpl extends Transform implements Plugin<Project> {
     void transform(Context context, Collection<TransformInput> inputs, Collection<TransformInput> referencedInputs,
                    TransformOutputProvider outputProvider, boolean isIncremental) throws IOException, TransformException, InterruptedException {
         println '==================anna start=================='
-        //配置文件读取
-//        Iterator<String> it = props.stringPropertyNames().iterator();
-//        ArrayList<AssassinDO> propsItem = new ArrayList<>();
-//        String option  = AssassinMethodClassVisitor.OPTION_DEFAULT;
-//        while(it.hasNext()){
-//            String key = it.next();
-//            String v = props[key];
-//            //打印配置
-//            println key + "=" + v
-//            if(key.equals(AssassinMethodClassVisitor.OPTION_NAME)){
-//                option = v;
-//                continue;
-//            }
-//            //将配置数据封装
-//            AssassinDO assassinDO = new AssassinDO();
-//            String[] itemKey = key.split("\\.");
-//            assassinDO.mate = itemKey[0];
-//            assassinDO.type = itemKey[1];
-//            assassinDO.key = itemKey[2];
-//            assassinDO.value = v;
-//
-//            println assassinDO.toString()
-//
-//            propsItem.add(assassinDO);
-//        }
         //写入inject数据
         AnnaInjectWriter annaInjectWriter = new AnnaInjectWriter();
         for(String buildDir : mBuildDirs){
@@ -218,8 +130,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                                         !"R.class".equals(name) && !"BuildConfig.class".equals(name)) {
                                     ClassReader classReader = new ClassReader(file.bytes)
                                     ClassWriter classWriter = new ClassWriter(classReader,ClassWriter.COMPUTE_MAXS)
-                                    ClassVisitor cv = new AnnaClassVisitor(injectClazz, Opcodes.ASM5,classWriter)
-//                                    ClassVisitor cv = new AssassinMethodClassVisitor(classWriter, mReceiver, process)
+                                    ClassVisitor cv = new AnnaClassVisitor(injectClazz, Opcodes.ASM5,classWriter,mNeedInject,mInclude)
                                     classReader.accept(cv, EXPAND_FRAMES)
                                     byte[] code = classWriter.toByteArray()
                                     FileOutputStream fos = new FileOutputStream(
@@ -281,7 +192,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                                 jarOutputStream.putNextEntry(zipEntry);
                                 ClassReader classReader = new ClassReader(IOUtils.toByteArray(inputStream))
                                 ClassWriter classWriter = new ClassWriter(classReader,ClassWriter.COMPUTE_MAXS)
-                                ClassVisitor cv = new AnnaClassVisitor(injectClazz, Opcodes.ASM5,classWriter)
+                                ClassVisitor cv = new AnnaClassVisitor(injectClazz, Opcodes.ASM5,classWriter,mNeedInject,mInclude)
                                 classReader.accept(cv, EXPAND_FRAMES)
                                 byte[] code = classWriter.toByteArray()
                                 jarOutputStream.write(code);
