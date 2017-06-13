@@ -3,6 +3,7 @@ package com.meetyou.anna.plugin;
 import com.meetyou.anna.inject.support.AnnaInjected;
 
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -72,7 +73,7 @@ public class AnnaClassVisitor extends ClassVisitor {
                 if ((access & Opcodes.ACC_NATIVE) != 0) {
                     return;
                 }
-                mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "getInject", "()L" + mInjectClazz + ";", false);
+//                mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "getInject", "()L" + mInjectClazz + ";", false);
                 mv.visitLdcInsn(mClazzName);
                 boolean is_static = false;
                 if ((methodAccess & ACC_STATIC) == 0) {
@@ -96,7 +97,32 @@ public class AnnaClassVisitor extends ClassVisitor {
                 }
 //                push((String) null);
                 mv.visitLdcInsn(Type.getReturnType(methodDesc).toString());
-                mv.visitMethodInsn(INVOKEVIRTUAL, mInjectClazz, "onMethodEnter", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", false);
+                mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "onMethodEnter", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)Z", false);
+                Label l1 = new Label();
+                mv.visitJumpInsn(Opcodes.IFEQ, l1);
+                //返回
+                mv.visitLdcInsn(mClazzName);
+                if ((methodAccess & ACC_STATIC) == 0) {
+                    loadThis();
+                    is_static = false;
+                } else {
+                    push((String) null);
+                    is_static = true;
+                }
+                mv.visitLdcInsn(name);
+//                loadArgArray();
+                if(paramsTypeClass.size() == 0){
+                    push((String) null);
+                }else {
+                    AnnaAsmUtils.createObjectArray(mv, paramsTypeClass, is_static);
+                }
+//                push((String) null);
+                mv.visitLdcInsn(Type.getReturnType(methodDesc).toString());
+                mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "onIntercept", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;", false);
+                AnnaAsmUtils.returnResult(mv,Type.getReturnType(desc));
+                mv.visitLabel(l1);
+
+
             }
 
             @Override
@@ -113,7 +139,6 @@ public class AnnaClassVisitor extends ClassVisitor {
                 if ((access & Opcodes.ACC_NATIVE) != 0) {
                     return;
                 }
-                mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "getInject", "()L" + mInjectClazz + ";", false);
                 mv.visitLdcInsn(mClazzName);
                 boolean is_static = false;
                 if ((methodAccess & ACC_STATIC) == 0) {
@@ -136,7 +161,7 @@ public class AnnaClassVisitor extends ClassVisitor {
 //                    AnnaAsmUtils.createObjectArray(mv, paramsTypeClass, is_static);
 //                }
                 mv.visitLdcInsn(Type.getReturnType(methodDesc).toString());
-                mv.visitMethodInsn(INVOKEVIRTUAL, mInjectClazz, "onMethodExit", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", false);
+                mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "onMethodExit", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", false);
             }
         };
         return methodVisitor;

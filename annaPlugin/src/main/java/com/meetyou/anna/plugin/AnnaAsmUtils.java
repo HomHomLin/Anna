@@ -148,7 +148,7 @@ public final class AnnaAsmUtils {
      * @param paramsTypeClass
      * @param isStatic
      */
-    public static int createObjectArray(MethodVisitor mv, List<Type> paramsTypeClass, boolean isStatic){
+    public static void createObjectArray(MethodVisitor mv, List<Type> paramsTypeClass, boolean isStatic){
         //Opcodes.ICONST_0 ~ Opcodes.ICONST_5 这个指令范围
         int argsCount = paramsTypeClass.size();
         //声明 Object[argsCount];
@@ -188,7 +188,6 @@ public final class AnnaAsmUtils {
             }
             loadIndex ++;
         }
-        return loadIndex;
     }
 
     private static void createBooleanObj(MethodVisitor mv, int argsPostion){
