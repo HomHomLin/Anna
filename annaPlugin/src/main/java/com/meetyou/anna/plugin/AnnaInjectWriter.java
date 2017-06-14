@@ -158,7 +158,7 @@ public class AnnaInjectWriter implements Opcodes{
             mv.visitEnd();
         }
         {
-            mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC + ACC_SYNCHRONIZED, "onMethodEnter", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)Z", null, null);
+            mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "onMethodEnter", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)Z", null, null);
             mv.visitCode();
             Label l0 = new Label();
             Label l1 = new Label();
@@ -243,7 +243,7 @@ public class AnnaInjectWriter implements Opcodes{
             mv.visitEnd();
         }
         {
-            mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC + ACC_SYNCHRONIZED, "onIntercept", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;", null, null);
+            mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "onIntercept", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;", null, null);
             mv.visitCode();
             Label l0 = new Label();
             Label l1 = new Label();
@@ -326,7 +326,7 @@ public class AnnaInjectWriter implements Opcodes{
             mv.visitEnd();
         }
         {
-            mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC + ACC_SYNCHRONIZED, "onMethodExit", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", null, null);
+            mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "onMethodExit", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", null, null);
             mv.visitCode();
             Label l0 = new Label();
             Label l1 = new Label();
