@@ -17,8 +17,8 @@ public class TestReceiver extends IAnnaReceiver{
     }
 
     @Override
-    public void onMethodExit(String clazz, Object obj, String name, Object[] objects, String rtype) {
-        super.onMethodExit(clazz, obj, name, objects, rtype);
+    public void onMethodExit(String clazz, Object obj, String name, String rtype) {
+        super.onMethodExit(clazz, obj, name, rtype);
         Log.d("TestReceiver", "onMethodExit:" + clazz + ";" + name);
     }
 

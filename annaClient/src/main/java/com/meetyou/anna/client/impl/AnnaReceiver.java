@@ -2,7 +2,7 @@ package com.meetyou.anna.client.impl;
 
 import android.util.Log;
 
-import com.meetyou.anna.plugin.AntiAssassin;
+import com.meetyou.anna.plugin.AntiAnna;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 /**
  * Created by Linhh on 17/6/8.
  */
-@AntiAssassin
+@AntiAnna
 public class AnnaReceiver {
     private Object mAnnaMetas;
     private Method mMethodGetMap;
@@ -85,7 +85,7 @@ public class AnnaReceiver {
         try {
             ArrayList<IAnnaReceiver> iAnnaReceivers = getReceiver(clazz, name);
             if(iAnnaReceivers != null && iAnnaReceivers.size() > 0){
-                iAnnaReceivers.get(0).onMethodExit(clazz, obj, name, objects,rtype);
+                iAnnaReceivers.get(0).onMethodExit(clazz, obj, name,rtype);
             }
         } catch (Exception e) {
             e.printStackTrace();

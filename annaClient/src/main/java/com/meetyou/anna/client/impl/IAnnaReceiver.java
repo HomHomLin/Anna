@@ -1,19 +1,17 @@
 package com.meetyou.anna.client.impl;
 
-import android.util.Log;
-
-import com.meetyou.anna.plugin.AntiAssassin;
+import com.meetyou.anna.plugin.AntiAnna;
 
 /**
  * Created by Linhh on 17/6/13.
  */
-@AntiAssassin
+@AntiAnna
 public class IAnnaReceiver {
 
     public IAnnaReceiver(){
     }
 
-    public void onMethodExit(String clazz, Object obj, String name, Object[] objects, String rtype){
+    public void onMethodExit(String clazz, Object obj, String name, String rtype){
     }
 
     public Object onIntercept(String clazz, Object obj, String name, Object[] objects, String rtype){

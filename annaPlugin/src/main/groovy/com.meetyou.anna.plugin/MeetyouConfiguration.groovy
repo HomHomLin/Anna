@@ -16,7 +16,8 @@ public class MeetyouConfiguration {
 
     public void print(){
         for (Map.Entry<String,ArrayList<ConfigurationDO>> entry : map.entrySet()) {
-            System.out.println("key:    " + entry.key);
+            println "configuration do:"
+            System.out.println(entry.key);
             for(ConfigurationDO configurationDO : entry.value){
                 System.out.println(configurationDO.toString());
             }

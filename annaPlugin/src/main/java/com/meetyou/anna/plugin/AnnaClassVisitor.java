@@ -12,7 +12,6 @@ import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.tree.AnnotationNode;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -46,7 +45,7 @@ public class AnnaClassVisitor extends ClassVisitor {
 
     @Override
     public org.objectweb.asm.AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        if (Type.getDescriptor(AntiAssassin.class).equals(desc) || Type.getDescriptor(AnnaInjected.class).equals(desc)) {
+        if (Type.getDescriptor(AntiAnna.class).equals(desc) || Type.getDescriptor(AnnaInjected.class).equals(desc)) {
             mAnnaInject = false;
         }else if(Type.getDescriptor(AnnaReceiver.class).equals(desc)){
             //执行

@@ -39,6 +39,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
     private HashMap<String, ArrayList<String>> mMetas = new HashMap<>();
 
     void apply(Project project) {
+        println '==============anna apply start=================='
         //读取当前工程的build dir
         project.android.applicationVariants.all {
             it ->
@@ -57,13 +58,13 @@ public class PluginImpl extends Transform implements Plugin<Project> {
             mNeedInject = switch_list.get(0).strings[0].equals("all");
         }
 
-        print "need inject=" + mNeedInject
+        println "need inject=" + mNeedInject
 
 
         def android = project.extensions.getByType(AppExtension);
         android.registerTransform(this)
 
-        println '==================apply end=================='
+        println '==============anna apply end=================='
     }
 
 
@@ -115,7 +116,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
     @Override
     void transform(Context context, Collection<TransformInput> inputs, Collection<TransformInput> referencedInputs,
                    TransformOutputProvider outputProvider, boolean isIncremental) throws IOException, TransformException, InterruptedException {
-        println '==================anna start=================='
+        println '==================anna transform start=================='
         //写入inject数据
         AnnaInjectWriter annaInjectWriter = new AnnaInjectWriter();
         for(String buildDir : mBuildDirs){
@@ -162,7 +163,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                                     fos.close()
 
                                     processMetas(cv);
-                                    println 'Anna-----> assassin file:' + file.getAbsolutePath()
+                                    println 'Anna-----> inject file:' + file.getAbsolutePath()
                                 }
 //                                println 'Assassin-----> find file:' + file.getAbsolutePath()
                                 //project.logger.
@@ -290,7 +291,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
         jarOutputStream.close();
 //        jarFile.close();
 
-        println '==================Anna end=================='
+        println '==================Anna transform end=================='
 
     }
 }
