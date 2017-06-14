@@ -13,6 +13,7 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.tree.AnnotationNode
 
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -34,6 +35,8 @@ public class PluginImpl extends Transform implements Plugin<Project> {
     private String mInjectPkg = "com/meetyou/anna/inject/support";
     private String minjectClass = "AnnaProjectInject"
     private boolean mNeedInject = false;
+    //metas
+    private HashMap<String, ArrayList<String>> mMetas = new HashMap<>();
 
     void apply(Project project) {
         //读取当前工程的build dir
@@ -89,6 +92,26 @@ public class PluginImpl extends Transform implements Plugin<Project> {
         super.transform(transformInvocation)
     }
 
+    void processMetas(AnnaClassVisitor cv){
+        if(cv.mAnnotationList != null) {
+            for (AnnotationNode annotationNode : cv.mAnnotationList) {
+                List vl = annotationNode.values;
+                if (vl != null) {
+                    //vl.get(0).toString() 属性名字
+                    ArrayList<String> metaClazz = mMetas.get(vl.get(1));
+                    if (metaClazz == null){
+                        metaClazz = new ArrayList<>();
+                    }
+                    if(!metaClazz.contains(cv.mClazzName)){
+                        metaClazz.add(cv.mClazzName);
+                    }
+                    mMetas.put(vl.get(1), metaClazz);
+                    println "anna annotation:" + cv.mClazzName + ';' + vl.get(0).toString() + "=" + vl.get(1)
+                }
+            }
+        }
+    }
+
     @Override
     void transform(Context context, Collection<TransformInput> inputs, Collection<TransformInput> referencedInputs,
                    TransformOutputProvider outputProvider, boolean isIncremental) throws IOException, TransformException, InterruptedException {
@@ -137,6 +160,8 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                                             file.parentFile.absolutePath + File.separator + name)
                                     fos.write(code)
                                     fos.close()
+
+                                    processMetas(cv);
                                     println 'Anna-----> assassin file:' + file.getAbsolutePath()
                                 }
 //                                println 'Assassin-----> find file:' + file.getAbsolutePath()
@@ -196,6 +221,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                                 classReader.accept(cv, EXPAND_FRAMES)
                                 byte[] code = classWriter.toByteArray()
                                 jarOutputStream.write(code);
+                                processMetas(cv);
                             } else if(entryName.contains("META-INF/services/javax.annotation.processing.Processor")){
                                 if(!processorList.contains(entryName)){
                                     println "entryName no anna:" + entryName
@@ -243,6 +269,27 @@ public class PluginImpl extends Transform implements Plugin<Project> {
                 }
             }
         }
+
+        //创建meta数据
+        File meta_file = outputProvider.getContentLocation("anna_inject_metas", getOutputTypes(), getScopes(),
+                Format.JAR);
+        if(!meta_file.getParentFile().exists()){
+            meta_file.getParentFile().mkdirs();
+        }
+        if(meta_file.exists()){
+            meta_file.delete();
+        }
+
+//        JarFile jarFile = new JarFile(meta_file);
+        JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(meta_file));
+        ZipEntry addEntry = new ZipEntry("com/meetyou/anna/inject/support/AnnaInjectMetas.class");
+        jarOutputStream.putNextEntry(addEntry);
+        jarOutputStream.write(annaInjectWriter.makeMetas("com/meetyou/anna/inject/support/AnnaInjectMetas",mMetas));
+        jarOutputStream.closeEntry();
+        //结束
+        jarOutputStream.close();
+//        jarFile.close();
+
         println '==================Anna end=================='
 
     }

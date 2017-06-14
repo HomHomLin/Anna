@@ -5,10 +5,14 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
+import com.meetyou.anna.plugin.AnnaReceiver;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.Pattern;
 public class MainActivity extends FragmentActivity {
 
     @Override
@@ -22,7 +26,6 @@ public class MainActivity extends FragmentActivity {
     }
 
     public void onClick(){
-
     }
 
     public static boolean testanna(){

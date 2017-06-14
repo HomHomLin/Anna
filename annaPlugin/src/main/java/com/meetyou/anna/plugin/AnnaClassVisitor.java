@@ -9,6 +9,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
+import org.objectweb.asm.tree.AnnotationNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +25,8 @@ public class AnnaClassVisitor extends ClassVisitor {
     private boolean mAnnaInject = true;
     private boolean mAnnaAll = false;
     private String mInjectClazz;
-    private String mClazzName;
+    public String mClazzName;
+    public List<AnnotationNode> mAnnotationList;
 
     public AnnaClassVisitor(String injectClazz, int api, ClassVisitor cv, boolean all, ArrayList<ConfigurationDO> list) {
         super(api, cv);
@@ -46,6 +48,15 @@ public class AnnaClassVisitor extends ClassVisitor {
     public org.objectweb.asm.AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         if (Type.getDescriptor(AntiAssassin.class).equals(desc) || Type.getDescriptor(AnnaInjected.class).equals(desc)) {
             mAnnaInject = false;
+        }else if(Type.getDescriptor(AnnaReceiver.class).equals(desc)){
+            //执行
+            mAnnaInject = false;
+            if(mAnnotationList == null){
+                mAnnotationList = new ArrayList<>();
+            }
+            AnnotationNode an = new AnnotationNode(desc);
+            mAnnotationList.add(an);
+            return an;
         }
         return super.visitAnnotation(desc, visible);
     }
