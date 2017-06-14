@@ -147,7 +147,7 @@ onMethodEnter是一个方法必然会执行的生命周期。
 
 ## 生命周期示意
 
-![p2](https://raw.githubusercontent.com/HomHomLin/Anna/master/liucheng.png)
+![p2](https://raw.githubusercontent.com/HomHomLin/Anna/master/stuff.png)
 
 
 ## Developed By
