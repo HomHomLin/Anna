@@ -21,7 +21,7 @@ Anna通过编译期的插桩替换操作来达到dex修改的能力。
 在主工程的build.gradle中加入
 
 ```groovy
-classpath 'com.meiyou.sdk.plugin:anna-compiler:0.0.82-SNAPSHOT'
+classpath 'com.meiyou.sdk.plugin:anna-compiler:0.0.91-SNAPSHOT'
 ```
 
 在你的主工程中加入插件和依赖
@@ -30,7 +30,7 @@ classpath 'com.meiyou.sdk.plugin:anna-compiler:0.0.82-SNAPSHOT'
 apply plugin: 'anna'
 
 
-compile 'com.meiyou.sdk.lib:anna:0.0.12-SNAPSHOT'
+compile 'com.meiyou.sdk.lib:anna:0.0.17-SNAPSHOT'
 ```
 
 ### 配置处理的方法
