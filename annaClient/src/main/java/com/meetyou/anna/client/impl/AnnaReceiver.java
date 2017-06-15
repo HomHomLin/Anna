@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -15,47 +16,48 @@ import java.util.regex.Pattern;
  */
 @AntiAnna
 public class AnnaReceiver {
-    private Object mAnnaMetas;
-    private Method mMethodGetMap;
-    private HashMap<String, ArrayList<String>> mMap = null;
-    private HashMap<String, IAnnaReceiver> mObjectMap = new HashMap<>();
+    private static Method mMethodGetMap;
+    private static Object mMetasObject;
+    private static ConcurrentHashMap<String, IAnnaReceiver> mObjectMap = new ConcurrentHashMap<>();
 
-    public void makeClazz() throws Exception {
+    public static void makeClazz() throws Exception {
         Class var0 = Class.forName("com.meetyou.anna.inject.support.AnnaInjectMetas");
-        mAnnaMetas = var0.newInstance();
+        mMetasObject = var0.newInstance();
+        mMethodGetMap = mMetasObject.getClass().getMethod("getMap");
     }
 
-    public IAnnaReceiver makeReceiver(String clazz) throws Exception{
+    public static IAnnaReceiver makeReceiver(String clazz) throws Exception{
         Class var0 = Class.forName(clazz);
         return (IAnnaReceiver)var0.newInstance();
     }
 
-    public AnnaReceiver(){
-        Log.w("AnnaReceiver","AnnaReceiver <init> is called");
+    public static void init(){
+
         try {
-            if(mAnnaMetas == null) {
-                makeClazz();
-            }
 
             if(mMethodGetMap == null) {
-                mMethodGetMap = mAnnaMetas.getClass().getMethod("getMap");
+                makeClazz();
+                Log.w("AnnaReceiver","AnnaReceiver <init> is called");
+                HashMap<String, ArrayList<String>> map =  (HashMap<String, ArrayList<String>>)mMethodGetMap.invoke(mMetasObject);
+                for (Map.Entry<String,ArrayList<String>> entry : map.entrySet()) {
+                    Log.d("annamap-test","key:    " + entry.getKey());
+                    for(String configurationDO : entry.getValue()){
+                        Log.d("annamap-test",configurationDO.toString());
+                    }
+                }
             }
 
-            mMap =  (HashMap<String, ArrayList<String>>)mMethodGetMap.invoke(mAnnaMetas);
-//            for (Map.Entry<String,ArrayList<String>> entry : mMap.entrySet()) {
-//                Log.d("annamap-test","key:    " + entry.getKey());
-//                for(String configurationDO : entry.getValue()){
-//                    Log.d("annamap-test",configurationDO.toString());
-//                }
-//            }
+
         } catch (Exception var6) {
             var6.printStackTrace();
         }
     }
 
-    private ArrayList<IAnnaReceiver> getReceiver(String clazz, String methodName) throws Exception{
+    private static  ArrayList<IAnnaReceiver> getReceiver(String clazz, String methodName) throws Exception{
+        init();
         ArrayList<IAnnaReceiver> list = new ArrayList<>();
-        for (Map.Entry<String,ArrayList<String>> entry : mMap.entrySet()) {
+        HashMap<String, ArrayList<String>> map =  (HashMap<String, ArrayList<String>>)mMethodGetMap.invoke(mMetasObject);
+        for (Map.Entry<String,ArrayList<String>> entry : map.entrySet()) {
             String[] s = entry.getKey().trim().split(" ");
             if(s[0].equals("**") || s[0].equals(clazz)){
                 //所有接收
@@ -80,7 +82,7 @@ public class AnnaReceiver {
         return list;
     }
 
-    public void onMethodExit(String clazz, Object obj, String name, Object[] objects, String rtype){
+    public static void onMethodExit(String clazz, Object obj, String name, Object[] objects, String rtype){
         Log.w("AnnaReceiver","onMethodExit is called:" + clazz + ";" + name);
         try {
             ArrayList<IAnnaReceiver> iAnnaReceivers = getReceiver(clazz, name);
@@ -92,7 +94,7 @@ public class AnnaReceiver {
         }
     }
 
-    public Object onIntercept(String clazz, Object obj, String name, Object[] objects, String rtype){
+    public static Object onIntercept(String clazz, Object obj, String name, Object[] objects, String rtype){
         Log.w("AnnaReceiver","onIntercept is called:" + clazz + ";" + name);
         try {
             ArrayList<IAnnaReceiver> iAnnaReceivers = getReceiver(clazz, name);
@@ -105,7 +107,7 @@ public class AnnaReceiver {
         return null;
     }
 
-    public boolean onMethodEnter(String clazz, Object obj, String name, Object[] objects, String rtype){
+    public static boolean onMethodEnter(String clazz, Object obj, String name, Object[] objects, String rtype){
         Log.d("AssassinReveiver","onMethodEnter is called:" + clazz + ";" + name);
         try {
             ArrayList<IAnnaReceiver> iAnnaReceivers = getReceiver(clazz, name);

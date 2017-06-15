@@ -29,7 +29,7 @@ public class AnnaClassVisitor extends ClassVisitor {
 
     public AnnaClassVisitor(String injectClazz, int api, ClassVisitor cv, boolean all, ArrayList<ConfigurationDO> list) {
         super(api, cv);
-        mInjectClazz = injectClazz;
+        mInjectClazz = "com/meetyou/anna/client/impl/AnnaReceiver";
         mAnnaAll = all;
         mList = list;
     }
