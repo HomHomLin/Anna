@@ -1,7 +1,5 @@
 package com.meetyou.anna.client.impl;
 
-import android.util.Log;
-
 import com.meetyou.anna.plugin.AntiAnna;
 
 import java.lang.reflect.Method;
@@ -37,14 +35,14 @@ public class AnnaReceiver {
 
             if(mMethodGetMap == null) {
                 makeClazz();
-                Log.w("AnnaReceiver","AnnaReceiver <init> is called");
-                HashMap<String, ArrayList<String>> map =  (HashMap<String, ArrayList<String>>)mMethodGetMap.invoke(mMetasObject);
-                for (Map.Entry<String,ArrayList<String>> entry : map.entrySet()) {
-                    Log.d("annamap-test","key:    " + entry.getKey());
-                    for(String configurationDO : entry.getValue()){
-                        Log.d("annamap-test",configurationDO.toString());
-                    }
-                }
+//                Log.w("AnnaReceiver","AnnaReceiver <init> is called");
+//                HashMap<String, ArrayList<String>> map =  (HashMap<String, ArrayList<String>>)mMethodGetMap.invoke(mMetasObject);
+//                for (Map.Entry<String,ArrayList<String>> entry : map.entrySet()) {
+//                    Log.d("annamap-test","key:    " + entry.getKey());
+//                    for(String configurationDO : entry.getValue()){
+//                        Log.d("annamap-test",configurationDO.toString());
+//                    }
+//                }
             }
 
 
@@ -66,7 +64,7 @@ public class AnnaReceiver {
                     //匹配成功
                     if(entry.getValue() != null){
                         for(String v : entry.getValue()){
-                            Log.d("annamap-test",v);
+//                            Log.d("annamap-test",v);
                             IAnnaReceiver iAnnaReceiver = mObjectMap.get(v);
                             if(iAnnaReceiver == null){
                                 iAnnaReceiver = makeReceiver(v);
@@ -83,7 +81,7 @@ public class AnnaReceiver {
     }
 
     public static void onMethodExit(String clazz, Object obj, String name, Object[] objects, String rtype){
-        Log.w("AnnaReceiver","onMethodExit is called:" + clazz + ";" + name);
+//        Log.w("AnnaReceiver","onMethodExit is called:" + clazz + ";" + name);
         try {
             ArrayList<IAnnaReceiver> iAnnaReceivers = getReceiver(clazz, name);
             if(iAnnaReceivers != null && iAnnaReceivers.size() > 0){
@@ -95,7 +93,7 @@ public class AnnaReceiver {
     }
 
     public static Object onIntercept(String clazz, Object obj, String name, Object[] objects, String rtype){
-        Log.w("AnnaReceiver","onIntercept is called:" + clazz + ";" + name);
+//        Log.w("AnnaReceiver","onIntercept is called:" + clazz + ";" + name);
         try {
             ArrayList<IAnnaReceiver> iAnnaReceivers = getReceiver(clazz, name);
             if(iAnnaReceivers != null && iAnnaReceivers.size() > 0){
@@ -108,7 +106,7 @@ public class AnnaReceiver {
     }
 
     public static boolean onMethodEnter(String clazz, Object obj, String name, Object[] objects, String rtype){
-        Log.d("AssassinReveiver","onMethodEnter is called:" + clazz + ";" + name);
+//        Log.d("AssassinReveiver","onMethodEnter is called:" + clazz + ";" + name);
         try {
             ArrayList<IAnnaReceiver> iAnnaReceivers = getReceiver(clazz, name);
             if(iAnnaReceivers != null && iAnnaReceivers.size() > 0){
