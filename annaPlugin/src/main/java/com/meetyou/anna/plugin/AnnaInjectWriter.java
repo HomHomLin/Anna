@@ -22,7 +22,7 @@ public class AnnaInjectWriter implements Opcodes{
         FieldVisitor fv;
         MethodVisitor mv;
 
-        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, pkg, null, /*"java/lang/Object"*/"com/meetyou/anna/client/impl/IAnnaReceiver", null);
+        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, pkg, null, "java/lang/Object", null);
 
 
         fv = cw.visitField(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, "map", "Ljava/util/HashMap;", "Ljava/util/HashMap<Ljava/lang/String;Ljava/util/ArrayList<Ljava/lang/String;>;>;", null);

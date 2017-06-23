@@ -94,6 +94,9 @@ public class AnnaClassVisitor extends ClassVisitor {
                                 //全部匹配
                                 anna_inject = Pattern.compile(s[1])
                                         .matcher(name).matches();
+                                if(anna_inject){
+                                    break;
+                                }
                             }
                         }
                     }
@@ -180,6 +183,9 @@ public class AnnaClassVisitor extends ClassVisitor {
                                 //全部匹配
                                 anna_inject = Pattern.compile(s[1])
                                         .matcher(name).matches();
+                                if(anna_inject){
+                                    break;
+                                }
                             }
                         }
                     }

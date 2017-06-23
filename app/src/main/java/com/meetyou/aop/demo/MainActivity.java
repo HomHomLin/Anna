@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
 
 import com.meetyou.anna.plugin.AnnaReceiver;
 
@@ -20,6 +21,12 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 //        Log.d("test",testanna() + "");
+        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
         boolean s = Pattern.compile("on[C]lick+")
                 .matcher("onClick").matches();
         Log.d("test",s + "");
