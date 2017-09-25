@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.meetyou.anna.plugin.AnnaReceiver;
+import com.meetyou.anna.plugin.AntiAnna;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
+
 public class MainActivity extends FragmentActivity {
 
     @Override
@@ -22,6 +24,7 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_main);
 //        Log.d("test",testanna() + "");
         findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+//            @AntiAnna
             @Override
             public void onClick(View v) {
 

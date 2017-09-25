@@ -22,11 +22,24 @@ buildscript {
         classpath "com.meiyou.framework.gradle.plugin:my-deploy:1.0.4"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+        //大杀器
+        classpath 'com.meiyou.sdk.plugin:anna-compiler:1.0.1'
     }
 }
 
 allprojects {
     repositories {
+        //mavenLocal()
+        maven {
+            url deployUrl
+        }
+        maven {
+            url deployReleaseUrl
+        }
+        maven {
+            url thirdpartyUrl
+        }
+        mavenCentral()
         jcenter()
     }
 }
@@ -34,3 +47,4 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+

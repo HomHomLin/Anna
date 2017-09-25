@@ -3,6 +3,7 @@ package com.meetyou.anna.plugin;
 import com.meetyou.anna.ConfigurationDO;
 import com.meetyou.anna.inject.support.AnnaInjected;
 
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -66,6 +67,15 @@ public class AnnaClassVisitor extends ClassVisitor {
         MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
         methodVisitor = new AdviceAdapter(Opcodes.ASM5, methodVisitor, access, name, desc) {
 
+            private boolean mMethodInject = true;
+            @Override
+            public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+                if (Type.getDescriptor(AntiAnna.class).equals(desc) || Type.getDescriptor(AnnaInjected.class).equals(desc)) {
+                    mMethodInject = false;
+                }
+                return super.visitAnnotation(desc, visible);
+            }
+
             @Override
             public void visitCode() {
                 super.visitCode();
@@ -82,6 +92,9 @@ public class AnnaClassVisitor extends ClassVisitor {
             @Override
             protected void onMethodEnter() {
                 if(!mAnnaInject){
+                    return;
+                }
+                if(!mMethodInject){
                     return;
                 }
                 if(!mAnnaAll) {
@@ -171,6 +184,9 @@ public class AnnaClassVisitor extends ClassVisitor {
             @Override
             protected void onMethodExit(int i) {
                 if(!mAnnaInject){
+                    return;
+                }
+                if(!mMethodInject){
                     return;
                 }
                 if(!mAnnaAll) {
