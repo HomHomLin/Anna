@@ -8,6 +8,7 @@
 #包含插入
 -include {
   ** onClick;
+  ** onLongClick;
 }
 #
 #-userinfo {

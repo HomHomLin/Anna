@@ -1,6 +1,5 @@
 package com.meetyou.aop.demo;
 
-import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
@@ -11,11 +10,11 @@ import com.meetyou.anna.plugin.AnnaReceiver;
  * Created by Linhh on 17/6/14.
  */
 @AnnaReceiver("** onClick")
-public class TestReceiver extends IAnnaReceiver{
+public class TestReceiver2 extends IAnnaReceiver{
 
     @Override
     public boolean onMethodEnter(String clazz, Object obj, String name, Object[] objects, String rtype) {
-        Log.d("TestReceiver", "onMethodEnter1:" + clazz + ";" + name);
+        Log.d("TestReceiver", "onMethodEnter2:" + clazz + ";" + name);
 //        if(obj != null &&
 //                objects != null &&
 //                objects.length == 1 &&

@@ -68,9 +68,20 @@ public class AnnaReceiver {
                             IAnnaReceiver iAnnaReceiver = mObjectMap.get(v);
                             if(iAnnaReceiver == null){
                                 iAnnaReceiver = makeReceiver(v);
+                                //将对应的类名的iAnnaReceiver缓存
+                                mObjectMap.put(v, iAnnaReceiver);
                             }
-                            mObjectMap.put(v, iAnnaReceiver);
-                            list.add(iAnnaReceiver);
+                            if(list.size() > 0){
+                                IAnnaReceiver iItem = list.get(0);
+                                if(iAnnaReceiver.level() >= iItem.level()){
+                                    list.add(iAnnaReceiver);
+                                }else{
+                                    list.add(0, iAnnaReceiver);
+                                }
+                            }else{
+                                list.add(iAnnaReceiver);
+                            }
+
                         }
                     }
                 }
@@ -85,7 +96,9 @@ public class AnnaReceiver {
         try {
             ArrayList<IAnnaReceiver> iAnnaReceivers = getReceiver(clazz, name);
             if(iAnnaReceivers != null && iAnnaReceivers.size() > 0){
-                iAnnaReceivers.get(0).onMethodExit(clazz, obj, name,rtype);
+                for(IAnnaReceiver iAnnaReceiver : iAnnaReceivers){
+                    iAnnaReceiver.onMethodExit(clazz, obj, name,rtype);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -97,6 +110,9 @@ public class AnnaReceiver {
         try {
             ArrayList<IAnnaReceiver> iAnnaReceivers = getReceiver(clazz, name);
             if(iAnnaReceivers != null && iAnnaReceivers.size() > 0){
+                for(int i = 1; i< iAnnaReceivers.size(); i ++ ){
+                    iAnnaReceivers.get(i).onIntercept(clazz, obj, name, objects,rtype);
+                }
                 return iAnnaReceivers.get(0).onIntercept(clazz, obj, name, objects,rtype);
             }
         } catch (Exception e) {
@@ -110,6 +126,9 @@ public class AnnaReceiver {
         try {
             ArrayList<IAnnaReceiver> iAnnaReceivers = getReceiver(clazz, name);
             if(iAnnaReceivers != null && iAnnaReceivers.size() > 0){
+                for(int i = 1; i< iAnnaReceivers.size(); i ++ ){
+                    iAnnaReceivers.get(i).onMethodEnter(clazz, obj, name, objects,rtype);
+                }
                 return iAnnaReceivers.get(0).onMethodEnter(clazz, obj, name, objects,rtype);
             }
         } catch (Exception e) {

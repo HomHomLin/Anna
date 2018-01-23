@@ -76,6 +76,16 @@ public class AnnaClassVisitor extends ClassVisitor {
                 return super.visitAnnotation(desc, visible);
             }
 
+            /**
+             * 读取参数
+             * @param name
+             * @param access
+             */
+            @Override
+            public void visitParameter(String name, int access) {
+                super.visitParameter(name, access);
+            }
+
             @Override
             public void visitCode() {
                 super.visitCode();

@@ -22,7 +22,14 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+//        getSupportFragmentManager().getFragments().get(0).getFragmentManager().isVisible()
 //        Log.d("test",testanna() + "");
+        findViewById(R.id.btn).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return false;
+            }
+        });
         findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
 //            @AntiAnna
             @Override
