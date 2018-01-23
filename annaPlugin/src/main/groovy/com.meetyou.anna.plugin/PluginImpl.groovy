@@ -136,6 +136,8 @@ public class PluginImpl extends Transform implements Plugin<Project> {
 
 
         }
+        if(outputProvider!=null)
+            outputProvider.deleteAll()
         //遍历inputs里的TransformInput
         inputs.each { TransformInput input ->
             //遍历input里边的DirectoryInput
