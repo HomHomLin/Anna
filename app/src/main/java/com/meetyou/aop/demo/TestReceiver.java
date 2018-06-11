@@ -32,4 +32,9 @@ public class TestReceiver extends IAnnaReceiver{
 //        }
         return super.onMethodEnter(clazz, obj, name, objects, rtype);
     }
+
+    @Override
+    public void onMethodExit(String clazz, Object obj, String name, Object[] objects, String rtype) {
+        super.onMethodExit(clazz, obj, name,objects, rtype);
+    }
 }

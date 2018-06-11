@@ -7,8 +7,10 @@
 
 #包含插入
 -include {
-  ** onClick;
-  ** onLongClick;
+  com.meetyou.aop.demo.AnnaInject onClick;
+  com.meetyou.aop.demo.AnnaInject onLongClick;
+  com.meetyou.aop.demo.AnnaInject2 onClick;
+  com.meetyou.aop.demo.AnnaInject2 onLongClick;
 }
 #
 #-userinfo {

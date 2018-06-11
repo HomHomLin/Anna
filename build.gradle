@@ -23,7 +23,7 @@ buildscript {
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
         //大杀器
-        classpath 'com.meiyou.sdk.plugin:anna-compiler:1.0.1'
+        classpath 'com.meiyou.sdk.plugin:anna-compiler:1.0.7'
     }
 }
 

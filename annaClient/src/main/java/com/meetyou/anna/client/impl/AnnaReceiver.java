@@ -97,7 +97,7 @@ public class AnnaReceiver {
             ArrayList<IAnnaReceiver> iAnnaReceivers = getReceiver(clazz, name);
             if(iAnnaReceivers != null && iAnnaReceivers.size() > 0){
                 for(IAnnaReceiver iAnnaReceiver : iAnnaReceivers){
-                    iAnnaReceiver.onMethodExit(clazz, obj, name,rtype);
+                    iAnnaReceiver.onMethodExit(clazz, obj, name,objects, rtype);
                 }
             }
         } catch (Exception e) {

@@ -11,7 +11,7 @@ public class IAnnaReceiver {
     public IAnnaReceiver(){
     }
 
-    public void onMethodExit(String clazz, Object obj, String name, String rtype){
+    public void onMethodExit(String clazz, Object obj, String name, Object[] objects,String rtype){
     }
 
     public Object onIntercept(String clazz, Object obj, String name, Object[] objects, String rtype){

@@ -104,6 +104,10 @@ public class AnnaClassVisitor extends ClassVisitor {
                 if(!mAnnaInject){
                     return;
                 }
+                if(mClazzName.startsWith("android")){
+                    //android的不插入
+                    return;
+                }
                 if(!mMethodInject){
                     return;
                 }
@@ -113,7 +117,9 @@ public class AnnaClassVisitor extends ClassVisitor {
                     if (mList != null) {
                         for (ConfigurationDO configurationDO : mList) {
                             String[] s = configurationDO.strings;
+                            System.out.print("测试:" + s[0]);
                             if (s[0].equals("**") || s[0].equals(mClazzName)) {
+                                System.out.print("测试:" + mClazzName);
                                 //全部匹配
                                 anna_inject = Pattern.compile(s[1])
                                         .matcher(name).matches();
@@ -244,11 +250,11 @@ public class AnnaClassVisitor extends ClassVisitor {
                     paramsTypeClass.add(type);
                 }
 //                loadArgArray();
-//                if(paramsTypeClass.size() == 0){
+                if(paramsTypeClass.size() == 0){
                     push((String) null);
-//                }else {
-//                    AnnaAsmUtils.createObjectArray(mv, paramsTypeClass, is_static);
-//                }
+                }else {
+                    AnnaAsmUtils.createObjectArray(mv, paramsTypeClass, is_static);
+                }
                 mv.visitLdcInsn(Type.getReturnType(methodDesc).toString());
                 mv.visitMethodInsn(INVOKESTATIC, mInjectClazz, "onMethodExit", "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/String;)V", false);
             }

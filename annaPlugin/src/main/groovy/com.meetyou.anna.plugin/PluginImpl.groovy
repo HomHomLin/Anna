@@ -3,6 +3,7 @@ package com.meetyou.anna.plugin
 import com.android.build.api.transform.*
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.pipeline.TransformManager
+import com.google.common.collect.Sets
 import com.meetyou.anna.ConfigurationDO
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
@@ -80,7 +81,29 @@ public class PluginImpl extends Transform implements Plugin<Project> {
 
     @Override
     public Set<QualifiedContent.Scope> getScopes() {
-        return TransformManager.SCOPE_FULL_PROJECT;
+//        return TransformManager.SCOPE_FULL_PROJECT;
+//        QualifiedContent.Scope.PROJECT,
+//        QualifiedContent.Scope.PROJECT_LOCAL_DEPS,
+//        QualifiedContent.Scope.SUB_PROJECTS,
+//        QualifiedContent.Scope.SUB_PROJECTS_LOCAL_DEPS,
+//        QualifiedContent.Scope.EXTERNAL_LIBRARIES
+        def name = QualifiedContent.Scope.PROJECT_LOCAL_DEPS.name()
+        def deprecated = QualifiedContent.Scope.PROJECT_LOCAL_DEPS.getClass()
+                .getField(name).getAnnotation(Deprecated.class)
+
+        if (deprecated == null) {
+            println "cannot find QualifiedContent.Scope.PROJECT_LOCAL_DEPS Deprecated.class "
+            return Sets.immutableEnumSet(QualifiedContent.Scope.PROJECT
+                    , QualifiedContent.Scope.PROJECT_LOCAL_DEPS
+                    , QualifiedContent.Scope.EXTERNAL_LIBRARIES
+                    , QualifiedContent.Scope.SUB_PROJECTS
+                    , QualifiedContent.Scope.SUB_PROJECTS_LOCAL_DEPS)
+        } else {
+            println "find QualifiedContent.Scope.PROJECT_LOCAL_DEPS Deprecated.class "
+            return Sets.immutableEnumSet(/*QualifiedContent.Scope.PROJECT
+                    , QualifiedContent.Scope.EXTERNAL_LIBRARIES
+                    , */QualifiedContent.Scope.SUB_PROJECTS)
+        }
     }
 
     @Override
@@ -92,6 +115,7 @@ public class PluginImpl extends Transform implements Plugin<Project> {
     void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
         super.transform(transformInvocation)
     }
+
 
     void processMetas(AnnaClassVisitor cv){
         if(cv.mAnnotationList != null) {
